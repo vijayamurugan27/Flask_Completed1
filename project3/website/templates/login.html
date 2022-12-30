@@ -1,0 +1,30 @@
+{% extends 'base.html'%}
+
+{% block content %}
+
+
+<br><br>
+<h3>Login page.</h3>
+    <div class="d-grid gap-10 " style="width : 500px; height: 300px">
+	    <form class=" gap-10 bg-secondary text-seondary bg-opacity-50" method="post" method = "post">
+
+			  <div class="p-3 form-group">
+			    <label for="email" class="form-label ">Email address</label>
+			    <input type="email" class="form-control " id="email" name = "email" placeholder="Enter Email address">			   
+			  </div>              
+
+              <div class="p-3 form-group">
+			    <label for="password" class="form-label ">Password</label>
+			    <input type="password" class="form-control " id="password" name = "password" placeholder="Enter Password">			   
+			  </div>
+
+              <br>
+
+	  			<button type="submit" class="p-1 form-check-label btn btn-primary" style="margin-left: 2%; ">Login</button>
+                <br><br>
+		</form>
+    </div>
+
+
+
+{% endblock %}
