@@ -1,0 +1,1400 @@
+This Flask project is taken from the webiste.
+
+https://www.tutorialspoint.com/flask/flask_environment.htm
+
+for this project run.
+
+python -m Hello
+
+for making debuggin on we can use two kinds of code.
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run()
+    app.run(debug = True)
+
+
+#or 
+
+if __name__ == '__main__':
+    app.run(debug=True)  # debugging Enabled.
+    
+
+the router accepts these kind of things for url routing.
+
+Sr.No. 	Converters & Description
+1 	
+
+int
+
+accepts integer
+2 	
+
+float
+
+For floating point value
+3 	
+
+path
+
+accepts slashes used as directory separator character.
+
+for example:
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/blog/<int:postID>')
+def show_blog(postID):
+   return 'Blog Number %d' % postID
+
+@app.route('/rev/<float:revNo>')
+def revision(revNo):
+   return 'Revision Number %f' % revNo
+
+if __name__ == '__main__':
+   app.run()
+
+
+---------------------------------------------------------------------
+
+The url_for() function is very useful for dynamically building a URL for a specific 
+function.  The function accepts the name of a function as first argument, and one or
+ more keyword arguments, each corresponding to the variable part of URL.
+
+ for example
+
+
+ from flask import Flask, redirect, url_for
+app = Flask(__name__)
+
+@app.route('/admin')
+def hello_admin():
+   return 'Hello Admin'
+
+@app.route('/guest/<guest>')
+def hello_guest(guest):
+   return 'Hello %s as Guest' % guest
+
+@app.route('/user/<name>')
+def hello_user(name):
+   if name =='admin':
+      return redirect(url_for('hello_admin'))
+   else:
+      return redirect(url_for('hello_guest',guest = name))
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+===============================================================================================
+
+
+Sr.No. 	Methods & Description
+1 	
+
+GET
+
+Sends data in unencrypted form to the server. Most common method.
+2 	
+
+HEAD
+
+Same as GET, but without response body
+3 	
+
+POST
+
+Used to send HTML form data to server. Data received by POST method is not cached by server.
+4 	
+
+PUT
+
+Replaces all current representations of the target resource with the uploaded content.
+5 	
+
+DELETE
+
+Removes all current representations of the target resource given by a URL
+
+
+======================================================================================
+
+For Jinja templates.
+
+The jinja2 template engine uses the following delimiters for escaping from HTML.
+
+    {% ... %} for Statements
+    {{ ... }} for Expressions to print to the template output
+    {# ... #} for Comments not included in the template output
+    # ... ## for Line Statements
+
+      {% if marks>50 %}
+         <h1> Your result is pass!</h1>
+      {% else %}
+         <h1>Your result is fail</h1>
+      {% endif %}
+
+===================================================================================
+
+The data from a client’s web page is sent to the server as a global request object. In order to process the request data, it should be imported from the Flask module.
+
+Important attributes of request object are listed below −
+
+    Form − It is a dictionary object containing key and value pairs of form parameters and their values.
+
+    args − parsed contents of query string which is part of URL after question mark (?).
+
+    Cookies − dictionary object holding Cookie names and values.
+
+    files − data pertaining to uploaded file.
+
+    method − current request method.
+=====================================================================================
+Cookies
+
+A cookie is stored on a client’s computer in the form of a text file. Its purpose is to remember and track data pertaining to a client’s usage for better visitor experience and site statistics.
+
+A Request object contains a cookie’s attribute. It is a dictionary object of all the cookie variables and their corresponding values, a client has transmitted. In addition to it, a cookie also stores its expiry time, path and domain name of the site.
+
+In Flask, cookies are set on response object. Use make_response() function to get response object from return value of a view function. After that, use the set_cookie() function of response object to store a cookie.
+
+Reading back a cookie is easy. The get() method of request.cookies attribute is used to read a cookie.
+
+In the following Flask application, a simple form opens up as you visit ‘/’ URL.
+
+@app.route('/')
+def index():
+   return render_template('index.html')
+
+This HTML page contains one text input.
+
+<html>
+   <body>
+      <form action = "/setcookie" method = "POST">
+         <p><h3>Enter userID</h3></p>
+         <p><input type = 'text' name = 'nm'/></p>
+         <p><input type = 'submit' value = 'Login'/></p>
+      </form>
+   </body>
+</html>
+
+The Form is posted to ‘/setcookie’ URL. The associated view function sets a Cookie name userID and renders another page.
+
+@app.route('/setcookie', methods = ['POST', 'GET'])
+def setcookie():
+   if request.method == 'POST':
+   user = request.form['nm']
+   
+   resp = make_response(render_template('readcookie.html'))
+   resp.set_cookie('userID', user)
+   
+   return resp
+
+‘readcookie.html’ contains a hyperlink to another view function getcookie(), which reads back and displays the cookie value in browser.
+
+@app.route('/getcookie')
+def getcookie():
+   name = request.cookies.get('userID')
+   return '<h1>welcome '+name+'</h1>'
+
+Run the application and visit http://localhost:5000/
+
+==============================================================================================================================================
+Sessions
+
+Like Cookie, Session data is stored on client. Session is the time interval when a client logs into a server and logs out of it. The data, which is needed to be held across this session, is stored in the client browser.
+
+A session with each client is assigned a Session ID. The Session data is stored on top of cookies and the server signs them cryptographically. For this encryption, a Flask application needs a defined SECRET_KEY.
+
+Session object is also a dictionary object containing key-value pairs of session variables and associated values.
+
+For example, to set a ‘username’ session variable use the statement −
+
+Session[‘username’] = ’admin’
+
+To release a session variable use pop() method.
+
+session.pop('username', None)
+
+The following code is a simple demonstration of session works in Flask. URL ‘/’ simply prompts user to log in, as session variable ‘username’ is not set.
+
+@app.route('/')
+def index():
+   if 'username' in session:
+      username = session['username']
+         return 'Logged in as ' + username + '<br>' + \
+         "<b><a href = '/logout'>click here to log out</a></b>"
+   return "You are not logged in <br><a href = '/login'></b>" + \
+      "click here to log in</b></a>"
+
+As user browses to ‘/login’ the login() view function, because it is called through GET method, opens up a login form.
+
+A Form is posted back to ‘/login’ and now session variable is set. Application is redirected to ‘/’. This time session variable ‘username’ is found.
+
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+   if request.method == 'POST':
+      session['username'] = request.form['username']
+      return redirect(url_for('index'))
+   return '''
+	
+   <form action = "" method = "post">
+      <p><input type = text name = username/></p>
+      <p<<input type = submit value = Login/></p>
+   </form>
+	
+   '''
+
+The application also contains a logout() view function, which pops out ‘username’ session variable. Hence, ‘/’ URL again shows the opening page.
+
+@app.route('/logout')
+def logout():
+   # remove the username from the session if it is there
+   session.pop('username', None)
+   return redirect(url_for('index'))
+
+Run the application and visit the homepage. (Ensure to set secret_key of the application)
+
+from flask import Flask, session, redirect, url_for, escape, request
+app = Flask(__name__)
+app.secret_key = 'any random string’
+
+The output will be displayed as shown below. Click the link “click here to log in”.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+FLask - redirect and errors:
+
+
+Flask class has a redirect() function. When called, it returns a response object and redirects the user to another target location with specified status code.
+
+Prototype of redirect() function is as below −
+
+Flask.redirect(location, statuscode, response)
+
+In the above function −
+
+    location parameter is the URL where response should be redirected.
+
+    statuscode sent to browser’s header, defaults to 302.
+
+    response parameter is used to instantiate response.
+
+The following status codes are standardized −
+
+    HTTP_300_MULTIPLE_CHOICES
+    HTTP_301_MOVED_PERMANENTLY
+    HTTP_302_FOUND
+    HTTP_303_SEE_OTHER
+    HTTP_304_NOT_MODIFIED
+    HTTP_305_USE_PROXY
+    HTTP_306_RESERVED
+    HTTP_307_TEMPORARY_REDIRECT
+
+The default status code is 302, which is for ‘found’.
+
+In the following example, the redirect() function is used to display the login page again when a login attempt fails.
+
+from flask import Flask, redirect, url_for, render_template, request
+# Initialize the Flask application
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+   return render_template('log_in.html')
+
+@app.route('/login',methods = ['POST', 'GET']) 
+def login(): 
+   if request.method == 'POST' and request.form['username'] == 'admin' :
+      return redirect(url_for('success'))
+   else:
+      return redirect(url_for('index'))
+
+@app.route('/success')
+def success():
+   return 'logged in successfully'
+	
+if __name__ == '__main__':
+   app.run(debug = True)
+
+Flask class has abort() function with an error code.
+
+Flask.abort(code)
+
+The Code parameter takes one of following values −
+
+    400 − for Bad Request
+
+    401 − for Unauthenticated
+
+    403 − for Forbidden
+
+    404 − for Not Found
+
+    406 − for Not Acceptable
+
+    415 − for Unsupported Media Type
+
+    429 − Too Many Requests
+
+Let us make a slight change in the login() function in the above code. Instead of re-displaying the login page, if ‘Unauthourized’ page is to be displayed, replace it with call to abort(401).
+
+from flask import Flask, redirect, url_for, render_template, request, abort
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+   return render_template('log_in.html')
+
+@app.route('/login',methods = ['POST', 'GET'])
+def login():
+   if request.method == 'POST':
+      if request.form['username'] == 'admin' :
+         return redirect(url_for('success'))
+      else:
+         abort(401)
+   else:
+      return redirect(url_for('index'))
+
+@app.route('/success')
+def success():
+   return 'logged in successfully'
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Flashing Flashing.
+
+A good GUI based application provides feedback to a user about the interaction. For example, the desktop applications use dialog or message box and JavaScript uses alerts for similar purpose.
+
+Generating such informative messages is easy in Flask web application. Flashing system of Flask framework makes it possible to create a message in one view and render it in a view function called next.
+
+A Flask module contains flash() method. It passes a message to the next request, which generally is a template.
+
+flash(message, category)
+
+Here,
+
+    message parameter is the actual message to be flashed.
+
+    category parameter is optional. It can be either ‘error’, ‘info’ or ‘warning’.
+
+In order to remove message from session, template calls get_flashed_messages().
+
+get_flashed_messages(with_categories, category_filter)
+
+Both parameters are optional. The first parameter is a tuple if received messages are having category. The second parameter is useful to display only specific messages.
+
+The following flashes received messages in a template.
+
+{% with messages = get_flashed_messages() %}
+   {% if messages %}
+      {% for message in messages %}
+         {{ message }}
+      {% endfor %}
+   {% endif %}
+{% endwith %}
+
+Let us now see a simple example, demonstrating the flashing mechanism in Flask. In the following code, a ‘/’ URL displays link to the login page, with no message to flash.
+
+@app.route('/')
+def index():
+   return render_template('index.html')
+
+The link leads a user to ‘/login’ URL which displays a login form. When submitted, the login() view function verifies a username and password and accordingly flashes a ‘success’ message or creates ‘error’ variable.
+
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+   error = None
+   
+   if request.method == 'POST':
+      if request.form['username'] != 'admin' or \
+         request.form['password'] != 'admin':
+         error = 'Invalid username or password. Please try again!'
+      else:
+         flash('You were successfully logged in')
+         return redirect(url_for('index'))
+   return render_template('login.html', error = error)
+
+In case of error, the login template is redisplayed with error message.
+Login.html
+
+<!doctype html>
+<html>
+   <body>
+      <h1>Login</h1>
+
+      {% if error %}
+         <p><strong>Error:</strong> {{ error }}
+      {% endif %}
+      
+      <form action = "" method = post>
+         <dl>
+            <dt>Username:</dt>
+            <dd>
+               <input type = text name = username 
+                  value = "{{request.form.username }}">
+            </dd>
+            <dt>Password:</dt>
+            <dd><input type = password name = password></dd>
+         </dl>
+         <p><input type = submit value = Login></p>
+      </form>
+   </body>
+</html>
+
+On the other hand, if login is successful, a success message is flashed on the index template.
+Index.html
+
+<!doctype html>
+<html>
+   <head>
+      <title>Flask Message flashing</title>
+   </head>
+   <body>
+      {% with messages = get_flashed_messages() %}
+         {% if messages %}
+            <ul>
+               {% for message in messages %}
+               <li<{{ message }}</li>
+               {% endfor %}
+            </ul>
+         {% endif %}
+      {% endwith %}
+		
+      <h1>Flask Message Flashing Example</h1>
+      <p>Do you want to <a href = "{{ url_for('login') }}">
+         <b>log in?</b></a></p>
+   </body>
+</html>
+
+A complete code for Flask message flashing example is given below −
+Flash.py
+
+from flask import Flask, flash, redirect, render_template, request, url_for
+app = Flask(__name__)
+app.secret_key = 'random string'
+
+@app.route('/')
+def index():
+   return render_template('index.html')
+
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+   error = None
+   
+   if request.method == 'POST':
+      if request.form['username'] != 'admin' or \
+         request.form['password'] != 'admin':
+         error = 'Invalid username or password. Please try again!'
+      else:
+         flash('You were successfully logged in')
+         return redirect(url_for('index'))
+			
+   return render_template('login.html', error = error)
+
+if __name__ == "__main__":
+   app.run(debug = True)
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Flask Extensions..
+
+
+Flask is often referred to as a micro framework, because a core functionality includes WSGI and routing based on Werkzeug and template engine based on Jinja2. In addition, Flask framework has support for cookie and sessions as well as web helpers like JSON, static files etc. Obviously, this is not enough for the development of a full-fledged web application. This is where the Flask extensions come in picture. Flask extensions give extensibility to Flask framework.
+
+There are a large number of Flask extensions available. A Flask extension is a Python module, which adds specific type of support to the Flask application. Flask Extension Registry is a directory of extensions available. The required extension can be downloaded by pip utility.
+
+In this tutorial, we will discuss the following important Flask extensions −
+
+    Flask Mail − provides SMTP interface to Flask application
+
+    Flask WTF − adds rendering and validation of WTForms
+
+    Flask SQLAlchemy − adds SQLAlchemy support to Flask application
+
+    Flask Sijax − Interface for Sijax - Python/jQuery library that makes AJAX easy to use in web applications
+
+Each type of extension usually provides extensive documentation about its usage. Since an extension is a Python module, it needs to be imported for it to be used. Flask extensions are generally named as flask-foo. To import,
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Flask -Mail
+
+A web based application is often required to have a feature of sending mail to the users/clients. Flask-Mail extension makes it very easy to set up a simple interface with any email server.
+
+At first, Flask-Mail extension should be installed with the help of pip utility.
+
+pip install Flask-Mail
+
+Then Flask-Mail needs to be configured by setting values of the following application parameters.
+Sr.No 	Parameters & Description
+1 	
+
+MAIL_SERVER
+
+Name/IP address of email server
+2 	
+
+MAIL_PORT
+
+Port number of server used
+3 	
+
+MAIL_USE_TLS
+
+Enable/disable Transport Security Layer encryption
+4 	
+
+MAIL_USE_SSL
+
+Enable/disable Secure Sockets Layer encryption
+5 	
+
+MAIL_DEBUG
+
+Debug support. Default is Flask application’s debug status
+6 	
+
+MAIL_USERNAME
+
+User name of sender
+7 	
+
+MAIL_PASSWORD
+
+password of sender
+8 	
+
+MAIL_DEFAULT_SENDER
+
+sets default sender
+9 	
+
+MAIL_MAX_EMAILS
+
+Sets maximum mails to be sent
+10 	
+
+MAIL_SUPPRESS_SEND
+
+Sending suppressed if app.testing set to true
+11 	
+
+MAIL_ASCII_ATTACHMENTS
+
+If set to true, attached filenames converted to ASCII
+
+The flask-mail module contains definitions of the following important classes.
+Mail class
+
+It manages email-messaging requirements. The class constructor takes the following form −
+
+flask-mail.Mail(app = None)
+
+The Constructor takes the Flask application object as a parameter.
+Methods of Mail class
+Sr.No 	Methods & Description
+1 	
+
+send()
+
+Sends contents of Message class object
+2 	
+
+connect()
+
+Opens connection with mail host
+3 	
+
+send_message()
+
+Sends message object
+Message class
+
+It encapsulates an email message. Message class constructor has several parameters −
+
+flask-mail.Message(subject, recipients, body, html, sender, cc, bcc, 
+   reply-to, date, charset, extra_headers, mail_options, rcpt_options)
+
+Message class methods
+
+attach() − adds an attachment to message. This method takes the following parameters −
+
+    filename − name of file to attach
+
+    content_type − MIME type of file
+
+    data − raw file data
+
+    disposition − content disposition, if any.
+
+add_recipient() − adds another recipient to message
+
+In the following example, SMTP server of Google’s gmail service is used as MAIL_SERVER for Flask-Mail configuration.
+
+Step 1 − Import Mail and Message class from flask-mail module in the code.
+
+from flask_mail import Mail, Message
+
+Step 2 − Then Flask-Mail is configured as per following settings.
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'yourId@gmail.com'
+app.config['MAIL_PASSWORD'] = '*****'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
+Step 3 − Create an instance of Mail class.
+
+mail = Mail(app)
+
+Step 4 − Set up a Message object in a Python function mapped by URL rule (‘/’).
+
+@app.route("/")
+def index():
+   msg = Message('Hello', sender = 'yourId@gmail.com', recipients = ['id1@gmail.com'])
+   msg.body = "This is the email body"
+   mail.send(msg)
+   return "Sent"
+
+Step 5 − The entire code is given below. Run the following script in Python Shell and visit http://localhost:5000/.
+
+from flask import Flask
+from flask_mail import Mail, Message
+
+app =Flask(__name__)
+mail=Mail(app)
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'yourId@gmail.com'
+app.config['MAIL_PASSWORD'] = '*****'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
+@app.route("/")
+def index():
+   msg = Message('Hello', sender = 'yourId@gmail.com', recipients = ['id1@gmail.com'])
+   msg.body = "Hello Flask message sent from Flask-Mail"
+   mail.send(msg)
+   return "Sent"
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+Note that the built-insecurity features in Gmail service may block this login attempt. You may have to decrease the security level. Please log in to your Gmail account and visit this link to decrease the security.
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+One of the essential aspects of a web application is to present a user interface for the user. HTML provides a <form> tag, which is used to design an interface. A Form’s elements such as text input, radio, select etc. can be used appropriately.
+
+Data entered by a user is submitted in the form of Http request message to the server side script by either GET or POST method.
+
+    The Server side script has to recreate the form elements from http request data. So in effect, form elements have to be defined twice – once in HTML and again in the server side script.
+
+    Another disadvantage of using HTML form is that it is difficult (if not impossible) to render the form elements dynamically. HTML itself provides no way to validate a user’s input.
+
+This is where WTForms, a flexible form, rendering and validation library comes handy. Flask-WTF extension provides a simple interface with this WTForms library.
+
+Using Flask-WTF, we can define the form fields in our Python script and render them using an HTML template. It is also possible to apply validation to the WTF field.
+
+Let us see how this dynamic generation of HTML works.
+
+First, Flask-WTF extension needs to be installed.
+
+pip install flask-WTF
+
+The installed package contains a Form class, which has to be used as a parent for user- defined form.
+
+WTforms package contains definitions of various form fields. Some Standard form fields are listed below.
+Sr.No 	Standard Form Fields & Description
+1 	
+
+TextField
+
+Represents <input type = 'text'> HTML form element
+2 	
+
+BooleanField
+
+Represents <input type = 'checkbox'> HTML form element
+3 	
+
+DecimalField
+
+Textfield for displaying number with decimals
+4 	
+
+IntegerField
+
+TextField for displaying integer
+5 	
+
+RadioField
+
+Represents <input type = 'radio'> HTML form element
+6 	
+
+SelectField
+
+Represents select form element
+7 	
+
+TextAreaField
+
+Represents <testarea> html form element
+8 	
+
+PasswordField
+
+Represents <input type = 'password'> HTML form element
+9 	
+
+SubmitField
+
+Represents <input type = 'submit'> form element
+
+For example, a form containing a text field can be designed as below −
+
+from flask_wtf import Form
+from wtforms import TextField
+
+class ContactForm(Form):
+   name = TextField("Name Of Student")
+
+In addition to the ‘name’ field, a hidden field for CSRF token is created automatically. This is to prevent Cross Site Request Forgery attack.
+
+When rendered, this will result into an equivalent HTML script as shown below.
+
+<input id = "csrf_token" name = "csrf_token" type = "hidden" />
+<label for = "name">Name Of Student</label><br>
+<input id = "name" name = "name" type = "text" value = "" />
+
+A user-defined form class is used in a Flask application and the form is rendered using a template.
+
+from flask import Flask, render_template
+from forms import ContactForm
+app = Flask(__name__)
+app.secret_key = 'development key'
+
+@app.route('/contact')
+def contact():
+   form = ContactForm()
+   return render_template('contact.html', form = form)
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+WTForms package also contains validator class. It is useful in applying validation to form fields. Following list shows commonly used validators.
+Sr.No 	Validators Class & Description
+1 	
+
+DataRequired
+
+Checks whether input field is empty
+2 	
+
+Email
+
+Checks whether text in the field follows email ID conventions
+3 	
+
+IPAddress
+
+Validates IP address in input field
+4 	
+
+Length
+
+Verifies if length of string in input field is in given range
+5 	
+
+NumberRange
+
+Validates a number in input field within given range
+6 	
+
+URL
+
+Validates URL entered in input field
+
+We shall now apply ‘DataRequired’ validation rule for the name field in contact form.
+
+name = TextField("Name Of Student",[validators.Required("Please enter your name.")])
+
+The validate() function of form object validates the form data and throws the validation errors if validation fails. The Error messages are sent to the template. In the HTML template, error messages are rendered dynamically.
+
+{% for message in form.name.errors %}
+   {{ message }}
+{% endfor %}
+
+The following example demonstrates the concepts given above. The design of Contact form is given below (forms.py).
+
+from flask_wtf import Form
+from wtforms import TextField, IntegerField, TextAreaField, SubmitField, RadioField,
+   SelectField
+
+from wtforms import validators, ValidationError
+
+class ContactForm(Form):
+   name = TextField("Name Of Student",[validators.Required("Please enter 
+      your name.")])
+   Gender = RadioField('Gender', choices = [('M','Male'),('F','Female')])
+   Address = TextAreaField("Address")
+   
+   email = TextField("Email",[validators.Required("Please enter your email address."),
+      validators.Email("Please enter your email address.")])
+   
+   Age = IntegerField("age")
+   language = SelectField('Languages', choices = [('cpp', 'C++'), 
+      ('py', 'Python')])
+   submit = SubmitField("Send")
+
+Validators are applied to the Name and Email fields.
+
+Given below is the Flask application script (formexample.py).
+
+from flask import Flask, render_template, request, flash
+from forms import ContactForm
+app = Flask(__name__)
+app.secret_key = 'development key'
+
+@app.route('/contact', methods = ['GET', 'POST'])
+def contact():
+   form = ContactForm()
+   
+   if request.method == 'POST':
+      if form.validate() == False:
+         flash('All fields are required.')
+         return render_template('contact.html', form = form)
+      else:
+         return render_template('success.html')
+      elif request.method == 'GET':
+         return render_template('contact.html', form = form)
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+The Script of the template (contact.html) is as follows −
+
+<!doctype html>
+<html>
+   <body>
+      <h2 style = "text-align: center;">Contact Form</h2>
+		
+      {% for message in form.name.errors %}
+         <div>{{ message }}</div>
+      {% endfor %}
+      
+      {% for message in form.email.errors %}
+         <div>{{ message }}</div>
+      {% endfor %}
+      
+      <form action = "http://localhost:5000/contact" method = post>
+         <fieldset>
+            <legend>Contact Form</legend>
+            {{ form.hidden_tag() }}
+            
+            <div style = font-size:20px; font-weight:bold; margin-left:150px;>
+               {{ form.name.label }}<br>
+               {{ form.name }}
+               <br>
+               
+               {{ form.Gender.label }} {{ form.Gender }}
+               {{ form.Address.label }}<br>
+               {{ form.Address }}
+               <br>
+               
+               {{ form.email.label }}<br>
+               {{ form.email }}
+               <br>
+               
+               {{ form.Age.label }}<br>
+               {{ form.Age }}
+               <br>
+               
+
+               
+               {{ form.language.label }}<br>
+               {{ form.language }}
+               <br>
+               {{ form.submit }}
+            </div>
+            
+         </fieldset>
+      </form>
+   </body>
+</html>
+
+Run formexample.py in Python shell and visit URL http://localhost:5000/contact. The Contact form will be displayed as shown below.
+
+
+
+============================================================================================================================================
+
+FLask-SQLIte
+
+
+
+
+
+
+Python has an in-built support for SQlite. SQlite3 module is shipped with Python distribution. For a detailed tutorial on using SQLite database in Python, please refer to this link. In this section we shall see how a Flask application interacts with SQLite.
+
+Create an SQLite database ‘database.db’ and create a students’ table in it.
+
+import sqlite3
+
+conn = sqlite3.connect('database.db')
+print "Opened database successfully";
+
+conn.execute('CREATE TABLE students (name TEXT, addr TEXT, city TEXT, pin TEXT)')
+print "Table created successfully";
+conn.close()
+
+Our Flask application has three View functions.
+
+First new_student() function is bound to the URL rule (‘/addnew’). It renders an HTML file containing student information form.
+
+@app.route('/enternew')
+def new_student():
+   return render_template('student.html')
+
+The HTML script for ‘student.html’ is as follows −
+
+<html>
+   <body>
+      <form action = "{{ url_for('addrec') }}" method = "POST">
+         <h3>Student Information</h3>
+         Name<br>
+         <input type = "text" name = "nm" /></br>
+         
+         Address<br>
+         <textarea name = "add" ></textarea><br>
+         
+         City<br>
+         <input type = "text" name = "city" /><br>
+         
+         PINCODE<br>
+         <input type = "text" name = "pin" /><br>
+         <input type = "submit" value = "submit" /><br>
+      </form>
+   </body>
+</html>
+
+As it can be seen, form data is posted to the ‘/addrec’ URL which binds the addrec() function.
+
+This addrec() function retrieves the form’s data by POST method and inserts in students table. Message corresponding to success or error in insert operation is rendered to ‘result.html’.
+
+@app.route('/addrec',methods = ['POST', 'GET'])
+def addrec():
+   if request.method == 'POST':
+      try:
+         nm = request.form['nm']
+         addr = request.form['add']
+         city = request.form['city']
+         pin = request.form['pin']
+         
+         with sql.connect("database.db") as con:
+            cur = con.cursor()
+            cur.execute("INSERT INTO students (name,addr,city,pin) 
+               VALUES (?,?,?,?)",(nm,addr,city,pin) )
+            
+            con.commit()
+            msg = "Record successfully added"
+      except:
+         con.rollback()
+         msg = "error in insert operation"
+      
+      finally:
+         return render_template("result.html",msg = msg)
+         con.close()
+
+The HTML script of result.html contains an escaping statement {{msg}} that displays the result of Insert operation.
+
+<!doctype html>
+<html>
+   <body>
+      result of addition : {{ msg }}
+      <h2><a href = "\">go back to home page</a></h2>
+   </body>
+</html>
+
+The application contains another list() function represented by ‘/list’ URL. It populates ‘rows’ as a MultiDict object containing all records in the students table. This object is passed to the list.html template.
+
+@app.route('/list')
+def list():
+   con = sql.connect("database.db")
+   con.row_factory = sql.Row
+   
+   cur = con.cursor()
+   cur.execute("select * from students")
+   
+   rows = cur.fetchall(); 
+   return render_template("list.html",rows = rows)
+
+This list.html is a template, which iterates over the row set and renders the data in an HTML table.
+
+<!doctype html>
+<html>
+   <body>
+      <table border = 1>
+         <thead>
+            <td>Name</td>
+            <td>Address>/td<
+            <td>city</td>
+            <td>Pincode</td>
+         </thead>
+         
+         {% for row in rows %}
+            <tr>
+               <td>{{row["name"]}}</td>
+               <td>{{row["addr"]}}</td>
+               <td> {{ row["city"]}}</td>
+               <td>{{row['pin']}}</td>	
+            </tr>
+         {% endfor %}
+      </table>
+      
+      <a href = "/">Go back to home page</a>
+   </body>
+</html>
+
+Finally, the ‘/’ URL rule renders a ‘home.html’ which acts as the entry point of the application.
+
+@app.route('/')
+def home():
+   return render_template('home.html')
+
+Here is the complete code of Flask-SQLite application.
+
+from flask import Flask, render_template, request
+import sqlite3 as sql
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+   return render_template('home.html')
+
+@app.route('/enternew')
+def new_student():
+   return render_template('student.html')
+
+@app.route('/addrec',methods = ['POST', 'GET'])
+def addrec():
+   if request.method == 'POST':
+      try:
+         nm = request.form['nm']
+         addr = request.form['add']
+         city = request.form['city']
+         pin = request.form['pin']
+         
+         with sql.connect("database.db") as con:
+            cur = con.cursor()
+            
+            cur.execute("INSERT INTO students (name,addr,city,pin) 
+               VALUES (?,?,?,?)",(nm,addr,city,pin) )
+            
+            con.commit()
+            msg = "Record successfully added"
+      except:
+         con.rollback()
+         msg = "error in insert operation"
+      
+      finally:
+         return render_template("result.html",msg = msg)
+         con.close()
+
+@app.route('/list')
+def list():
+   con = sql.connect("database.db")
+   con.row_factory = sql.Row
+   
+   cur = con.cursor()
+   cur.execute("select * from students")
+   
+   rows = cur.fetchall();
+   return render_template("list.html",rows = rows)
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+Flsak-SQLite
+
+Python has an in-built support for SQlite. SQlite3 module is shipped with Python distribution. For a detailed tutorial on using SQLite database in Python, please refer to this link. In this section we shall see how a Flask application interacts with SQLite.
+
+Create an SQLite database ‘database.db’ and create a students’ table in it.
+
+import sqlite3
+
+conn = sqlite3.connect('database.db')
+print "Opened database successfully";
+
+conn.execute('CREATE TABLE students (name TEXT, addr TEXT, city TEXT, pin TEXT)')
+print "Table created successfully";
+conn.close()
+
+Our Flask application has three View functions.
+
+First new_student() function is bound to the URL rule (‘/addnew’). It renders an HTML file containing student information form.
+
+@app.route('/enternew')
+def new_student():
+   return render_template('student.html')
+
+The HTML script for ‘student.html’ is as follows −
+
+<html>
+   <body>
+      <form action = "{{ url_for('addrec') }}" method = "POST">
+         <h3>Student Information</h3>
+         Name<br>
+         <input type = "text" name = "nm" /></br>
+         
+         Address<br>
+         <textarea name = "add" ></textarea><br>
+         
+         City<br>
+         <input type = "text" name = "city" /><br>
+         
+         PINCODE<br>
+         <input type = "text" name = "pin" /><br>
+         <input type = "submit" value = "submit" /><br>
+      </form>
+   </body>
+</html>
+
+As it can be seen, form data is posted to the ‘/addrec’ URL which binds the addrec() function.
+
+This addrec() function retrieves the form’s data by POST method and inserts in students table. Message corresponding to success or error in insert operation is rendered to ‘result.html’.
+
+@app.route('/addrec',methods = ['POST', 'GET'])
+def addrec():
+   if request.method == 'POST':
+      try:
+         nm = request.form['nm']
+         addr = request.form['add']
+         city = request.form['city']
+         pin = request.form['pin']
+         
+         with sql.connect("database.db") as con:
+            cur = con.cursor()
+            cur.execute("INSERT INTO students (name,addr,city,pin) 
+               VALUES (?,?,?,?)",(nm,addr,city,pin) )
+            
+            con.commit()
+            msg = "Record successfully added"
+      except:
+         con.rollback()
+         msg = "error in insert operation"
+      
+      finally:
+         return render_template("result.html",msg = msg)
+         con.close()
+
+The HTML script of result.html contains an escaping statement {{msg}} that displays the result of Insert operation.
+
+<!doctype html>
+<html>
+   <body>
+      result of addition : {{ msg }}
+      <h2><a href = "\">go back to home page</a></h2>
+   </body>
+</html>
+
+The application contains another list() function represented by ‘/list’ URL. It populates ‘rows’ as a MultiDict object containing all records in the students table. This object is passed to the list.html template.
+
+@app.route('/list')
+def list():
+   con = sql.connect("database.db")
+   con.row_factory = sql.Row
+   
+   cur = con.cursor()
+   cur.execute("select * from students")
+   
+   rows = cur.fetchall(); 
+   return render_template("list.html",rows = rows)
+
+This list.html is a template, which iterates over the row set and renders the data in an HTML table.
+
+<!doctype html>
+<html>
+   <body>
+      <table border = 1>
+         <thead>
+            <td>Name</td>
+            <td>Address>/td<
+            <td>city</td>
+            <td>Pincode</td>
+         </thead>
+         
+         {% for row in rows %}
+            <tr>
+               <td>{{row["name"]}}</td>
+               <td>{{row["addr"]}}</td>
+               <td> {{ row["city"]}}</td>
+               <td>{{row['pin']}}</td>	
+            </tr>
+         {% endfor %}
+      </table>
+      
+      <a href = "/">Go back to home page</a>
+   </body>
+</html>
+
+Finally, the ‘/’ URL rule renders a ‘home.html’ which acts as the entry point of the application.
+
+@app.route('/')
+def home():
+   return render_template('home.html')
+
+Here is the complete code of Flask-SQLite application.
+
+from flask import Flask, render_template, request
+import sqlite3 as sql
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+   return render_template('home.html')
+
+@app.route('/enternew')
+def new_student():
+   return render_template('student.html')
+
+@app.route('/addrec',methods = ['POST', 'GET'])
+def addrec():
+   if request.method == 'POST':
+      try:
+         nm = request.form['nm']
+         addr = request.form['add']
+         city = request.form['city']
+         pin = request.form['pin']
+         
+         with sql.connect("database.db") as con:
+            cur = con.cursor()
+            
+            cur.execute("INSERT INTO students (name,addr,city,pin) 
+               VALUES (?,?,?,?)",(nm,addr,city,pin) )
+            
+            con.commit()
+            msg = "Record successfully added"
+      except:
+         con.rollback()
+         msg = "error in insert operation"
+      
+      finally:
+         return render_template("result.html",msg = msg)
+         con.close()
+
+@app.route('/list')
+def list():
+   con = sql.connect("database.db")
+   con.row_factory = sql.Row
+   
+   cur = con.cursor()
+   cur.execute("select * from students")
+   
+   rows = cur.fetchall();
+   return render_template("list.html",rows = rows)
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+   ===================================================================================================================================
+
+   Sijax stands for ‘Simple Ajax’ and it is a Python/jQuery library designed to help you easily bring Ajax to your application. It uses jQuery.ajax to make AJAX requests.
+Installation
+
+Installation of Flask-Sijax is easy.
+
+pip install flask-sijax
+
+Configuration
+
+    SIJAX_STATIC_PATH − the static path where you want the Sijax javascript files to be mirrored. The default location is static/js/sijax. In this folder, sijax.js and json2.js files are kept.
+
+    SIJAX_JSON_URI − the URI to load the json2.js static file from
+
+Sijax uses JSON to pass the data between the browser and the server. This means that the browsers need either to support JSON natively or get JSON support from the json2.js file.
+
+Functions registered that way cannot provide Sijax functionality, because they cannot be accessed using a POST method by default (and Sijax uses POST requests).
+
+To make a View function capable of handling Sijax requests, make it accessible via POST using @app.route('/url', methods = ['GET', 'POST']) or use the @flask_sijax.route helper decorator like this −
+
+@flask_sijax.route(app, '/hello')
+
+Every Sijax handler function (like this one) receives at least one parameter automatically, much like Python passes ‘self’ to the object methods. The ‘obj_response’ parameter is the function's way of talking back to the browser.
+
+def say_hi(obj_response):
+   obj_response.alert('Hi there!')
+
+When Sijax request is detected, Sijax handles it like this −
+
+g.sijax.register_callback('say_hi', say_hi)
+   return g.sijax.process_request()
+
+Sijax Application
+
+A minimal Sijax application code looks as follows −
+
+import os
+from flask import Flask, g
+from flask_sijax import sijax
+
+path = os.path.join('.', os.path.dirname(__file__), 'static/js/sijax/')
+app = Flask(__name__)
+
+app.config['SIJAX_STATIC_PATH'] = path
+app.config['SIJAX_JSON_URI'] = '/static/js/sijax/json2.js'
+flask_sijax.Sijax(app)
+
+@app.route('/')
+def index():
+   return 'Index'
+	
+@flask_sijax.route(app, '/hello')
+def hello():
+   def say_hi(obj_response):
+      obj_response.alert('Hi there!')
+   if g.sijax.is_sijax_request:
+      # Sijax request detected - let Sijax handle it
+      g.sijax.register_callback('say_hi', say_hi)
+      return g.sijax.process_request()
+      return _render_template('sijaxexample.html')
+
+if __name__ == '__main__':
+   app.run(debug = True)
+
+When a Sijax requests (a special jQuery.ajax() request) to the server, this request is detected on the server by g.sijax.is_sijax_request(), in which case you let Sijax handle the request.
+
+All the functions registered using g.sijax.register_callback() are exposed for calling from the browser.
+
+Calling g.sijax.process_request() tells Sijax to execute the appropriate (previously registered) function and return the response to the browser.
+
+
+
+in the browser we have to add these java script links.
+
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+        <script type="text/javascript" src="{ URI to jQuery - not included with this project }"></script>
+        <script type="text/javascript" src="/static/js/sijax/sijax.js"></script>
+        <script type="text/javascript"> {{ g.sijax.get_js()|safe }} </script>
+
+

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+   <head>
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+   </head>
+
+   <body>
+      <div class="row">
+
+         <div class="heading">
+            <h1>
+               SQL integration of Sijax.
+            </h1>
+         </div>
+
+         <div class = "column" style="background-color:#aaa; padding: 10px;">         
+            <h3>Students - Flask SQLAlchemy example</h3>
+            <hr/>
+            
+            {%- for category, message in get_flashed_messages(with_categories = true) %}
+               <div class = "alert alert-danger">
+                  {{ message }}
+               </div>
+            {%- endfor %}
+
+         <!-- </div>
+         new
+         <div class="column" style="background-color:#bbb;">    -->
+
+            <!-- <form action = "{{ request.path }}" method = "post"> -->
+            <form action = "new" method = "post">
+
+               <label for = "name">Name</label><br><br>
+               <input type = "text" name = "name" placeholder = "Name" /><br><br>
+
+               <label for = "email">City</label><br><br>
+               <input type = "text" name = "city" placeholder = "city" /><br><br>
+
+               <label for = "addr">Address</label><br><br>
+               <textarea name = "addr" placeholder = "address"></textarea><br><br>
+
+               <label for = "PIN">Pin Code.</label><br><br>
+               <input type = "text" name = "pin" placeholder = "pincode" /><br><br>
+
+               <input type = "submit" value = "Submit" />
+            </form>
+         </div>
+            
+         <div class="column" style="background-color:#ccc; padding: 5px;">
+            <div class="table">
+               <table border -2>
+                  <thead>
+                     <tr>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th>Pin</th>
+                     </tr>
+                  </thead>
+         
+                  <tbody>
+                     {% for student in students %}
+                        <tr>
+                           <td>{{ student.name }}</td>
+                           <td>{{ student.city }}</td>
+                           <td>{{ student.addr }}</td>
+                           <td>{{ student.pin }}</td>
+                        </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+
+         <div class="column" style="background-color:#ccc;" > 
+            <form>
+               
+               <h1 style="align-content: center;"> This is for the search bar.</h1><hr>
+                  <textarea id="txtbtn" placeholder="Search here for the Student details."></textarea><br><br>
+                  <button class="button" id = "bmt" href="javascript://" onclick="Sijax.request('sijax_search', [$('#text').val()]);">Search</button>
+                  
+            </form>  
+         
+
+         
+         
+         </div>
+         
+
+
+      </div>   
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      <a href="javascript://" onClick="Sijax.request('say_hi');">Click here</a>        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+        <script type="text/javascript" src="{ URI to jQuery - not included with this project }"></script>
+        <script type="text/javascript" src="/static/js/sijax/sijax.js"></script>
+        <script type="text/javascript"> {{ g.sijax.get_js()|safe }} </script>
+        
+        <script>
+         $("#bmt").click(function(e){
+            
+            var searchval = $("#txtbtn").val();
+            e.preventDefault();
+            alert(`${searchval} `);
+            document.getElementById("sear").innerHTML = searchval
+            $.ajax({
+               url: 'sijax_search1', 
+               type: 'POST',
+               data:{'searchval':searchval},
+               success: function( response){
+                  console.log(response);
+               },
+               error: function(error){
+                  console.log(error);
+               }
+            });
+         })
+        </script>
+
+      
+   </body>
+</html>

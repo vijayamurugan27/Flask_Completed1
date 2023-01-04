@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+   <body>
+      <h3>Students - Flask SQLAlchemy example</h3>
+      <hr/>
+      
+      {%- for category, message in get_flashed_messages(with_categories = true) %}
+         <div class = "alert alert-danger">
+            {{ message }}
+         </div>
+      {%- endfor %}
+      
+      <form action = "{{ request.path }}" method = "post">
+
+         <label for = "name">Name</label><br><br>
+         <input type = "text" name = "name" placeholder = "Name" /><br><br>
+
+         <label for = "email">City</label><br><br>
+         <input type = "text" name = "city" placeholder = "city" /><br><br>
+
+         <label for = "addr">Address</label><br><br>
+         <textarea name = "addr" placeholder = "address"></textarea><br><br>
+
+         <label for = "PIN">Pin Code.</label><br><br>
+         <input type = "text" name = "pin" placeholder = "pincode" /><br><br>
+
+         <input type = "submit" value = "Submit" />
+      </form>
+
+
+
+
+
+
+
+        <a href="javascript://" onClick="Sijax.request('say_hi');">Click here</a>        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+        <script type="text/javascript" src="{ URI to jQuery - not included with this project }"></script>
+        <script type="text/javascript" src="/static/js/sijax/sijax.js"></script>
+        <script type="text/javascript"> {{ g.sijax.get_js()|safe }} </script>
+   </body>
+</html>
